@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react'
 import {
 	AppstoreOutlined,
 	DashboardOutlined,
 	LogoutOutlined,
 	QuestionOutlined,
 	SettingOutlined,
-} from '@ant-design/icons';
-import { Layout, Menu, theme } from 'antd';
-import Sider from 'antd/es/layout/Sider';
-import { Content, Footer, Header } from 'antd/es/layout/layout';
-import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
-import { AuthProvider, useAuthContext } from '@asgardeo/auth-react';
+} from '@ant-design/icons'
+import { Layout, Menu, theme } from 'antd'
+import Sider from 'antd/es/layout/Sider'
+import { Content, Footer, Header } from 'antd/es/layout/layout'
+import { Link, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Hooks, useAuthContext } from '@asgardeo/auth-react'
+import { Management } from '../pages'
+
+
 function getItem(label, key, icon, children, type) {
 	return {
 		key,
@@ -18,9 +21,12 @@ function getItem(label, key, icon, children, type) {
 		children,
 		label,
 		type,
-	};
+	}
 }
+
 const items = [
+	getItem('AG ESB Manager', 'dashboard', <DashboardOutlined />
+	),
 	getItem('Dashboard', 'sub1', <DashboardOutlined />, [
 		getItem('Micro Integrator', 'g1', null, [getItem('MI Dashboard', '1')], 'group'),
 		getItem(
@@ -47,30 +53,60 @@ const items = [
 		],
 		'group'
 	),
-];
+]
+
+
+
 export const Root = () => {
-	const navigate = useNavigate();
+	const navigate = useNavigate()
+	const location = useLocation()
+
 	const {
 		token: { colorBgContainer },
-	} = theme.useToken();
+	} = theme.useToken()
 
 	const onClick = e => {
 		switch (e.key.toString()) {
-			case '1':
-				navigate('/management');
-				break;
 			case '14':
 				signOut()
-				break;
+				break
 			default:
-				break;
+				break
 		}
-	};
+	}
 
-	const { state, signOut } = useAuthContext();
-	// console.log({ state });
+	const { state, signOut, on } = useAuthContext()
+	// console.log({ state })
 
-	if (!state.isAuthenticated) return <Navigate to={'/login'} />;
+
+
+
+
+
+	const search = useLocation().search
+	const stateParam = new URLSearchParams(search).get('state')
+	const errorDescParam = new URLSearchParams(search).get('error_description')
+	console.log({ stateParam, errorDescParam })
+
+	useEffect(() => {
+		console.log("run eff")
+		on(Hooks.HttpRequestError, () => {
+			console.log("HttpRequestError")
+		})
+		on(Hooks.SignOut, () => {
+			console.log("Logout")
+		})
+		on(Hooks.SignOutFailed, () => {
+			console.log("logout failure1")
+			if (!errorDescParam) {
+				console.log("logout failure")
+			}
+		})
+	}, [on])
+
+
+
+	if (!state.isAuthenticated) return <Navigate to={'/login'} />
 
 	return (
 		<Layout>
@@ -84,27 +120,13 @@ export const Root = () => {
 					left: 0,
 					top: 0,
 					bottom: 0,
-					width: 256,
-					maxWidth: 256,
+					// width: 256,
+					// maxWidth: 256,
 				}}
 			>
-				<Header
-					style={{
-						padding: 5,
-						background: colorBgContainer,
-					}}
-				>
-					<div
-						style={{
-							textAlign: 'center',
-						}}
-					>
-						<Link to={'/'} >AG ESB Manager</Link>
-					</div>
-				</Header>
 				<Menu
 					onClick={onClick}
-					// defaultSelectedKeys={['1']}
+					defaultSelectedKeys={['dashboard']}
 					defaultOpenKeys={['sub1', 'sub2']}
 					mode='inline'
 					theme='light'
@@ -117,7 +139,7 @@ export const Root = () => {
 			<Layout
 				className='site-layout'
 				style={{
-					marginLeft: '10.0%',
+					marginLeft: 190,
 				}}
 			>
 				<Header
@@ -134,11 +156,12 @@ export const Root = () => {
 					<div
 						style={{
 							padding: 24,
-							minHeight: 360,
+							minHeight: 650,
 							background: colorBgContainer,
+							height: 'calc(100vh - 179px)'
 						}}
 					>
-						<Outlet />
+						{location.pathname == '/' ? <Management /> : <Outlet />}
 					</div>
 				</Content>
 				<Footer
@@ -150,5 +173,5 @@ export const Root = () => {
 				</Footer>
 			</Layout>
 		</Layout>
-	);
-};
+	)
+}

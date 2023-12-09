@@ -1,3 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+li.ant-menu-item.ant-menu-item-selected {
+    background: #ff5000;
+    color: #fff;
+}
+
+.ant-menu-submenu-selected .ant-menu-submenu-title {
+    color: #ff5000 !important;
+    background-color: #ff500024;
+}

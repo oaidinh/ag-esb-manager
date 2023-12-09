@@ -3,6 +3,14 @@ import { useAuthContext } from '@asgardeo/auth-react';
 const Page = () => {
 	const { state, signIn, signOut } = useAuthContext();
 	console.log({ state });
+
+	const handleSignin = () => {
+		signIn().catch(err => console.log(err))
+	}
+	const handleSigout = () => {
+		signOut().catch(err => console.log(err))
+	}
+
 	return (
 		<div className='App'>
 			{state.isAuthenticated ? (
@@ -11,10 +19,10 @@ const Page = () => {
 						<li>{JSON.stringify(state)}</li>
 					</ul>
 
-					<button onClick={() => signOut()}>Logout</button>
+					<button onClick={handleSigout}>Logout</button>
 				</div>
 			) : (
-				<button onClick={() => signIn().catch(err => console.log(err))}>Login</button>
+				<button onClick={handleSignin}>Login</button>
 			)}
 		</div>
 	);
